@@ -17,7 +17,12 @@ def update_id(id, database, dict_token):
         if x["id"] == id:
             x.update(dict_token)  
             print(x)
-            break
+            return x
+            
+
+def find_id(id, database):
+    for x in database:
+        if x["id"] == id:
             return x
 
 
@@ -38,9 +43,10 @@ def my_profile():
     return {"user_name" : "me", "portfolio" : "1,000 USD"}  
 
 
-@app.get("/user/{userid}")
-def user_profile(userid: int):
-    return {"user_name" :userid, "portfolio" : "private"}
+@app.get("/crypto/{id}")
+def crypto_id(id: int):
+    token_id = find_id(id, database)
+    return {"pair id" : id, "data" : token_id}
 
 # Here is how to extract the data from the Body # Body is a property???
 @app.post("/crypto/create/", status_code=201)
@@ -56,5 +62,5 @@ def create_new_crypto(token: Token):
 @app.put("/crypto/create/{id}", status_code=201)
 def update_crypto(id: int, token: Token):
     dict_token = dict(token)
-    update_id(id, database, dict_token)
-    return {"new data": dict_token}
+    update_token = update_id(id, database, dict_token)
+    return {"new data": update_token} 
