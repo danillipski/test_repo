@@ -31,11 +31,11 @@ def my_profile():
 
 @app.get("/user/{userid}")
 def user_profile(userid: int):
-    return {f"user_name" : {userid}, "portfolio" : "private"}
+    return {"user_name" :userid, "portfolio" : "private"}
 
 # Here is how to extract the data from the Body # Body is a property???
 @app.post("/crypto/create/", status_code=201)
-def create_new_crypto(token: Token, id: Optional[int] = None):
+def create_new_crypto(token: Token):
     dict_token = dict(token)
     database.append(dict_token)
     add_id(id, database, dict_token)
