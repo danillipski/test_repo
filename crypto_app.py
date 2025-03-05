@@ -25,6 +25,13 @@ def find_id(id, database):
         if x["id"] == id:
             return x
 
+def delete_id(id, database):
+    for x in database:
+        if x["id"] == id:
+            database.pop()
+
+
+
 
 class Token(BaseModel):
     token_id: str
@@ -64,3 +71,12 @@ def update_crypto(id: int, token: Token):
     dict_token = dict(token)
     update_token = update_id(id, database, dict_token)
     return {"new data": update_token} 
+
+
+@app.delete("/crypto/{id}")
+def delete_crypto(id: int):
+    delete_id(id, database)
+    print(database, end=" ")
+    return {"id": id, "message" : "was succesfully deleted"}
+    
+    
