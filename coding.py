@@ -23,4 +23,8 @@ while is_running:
 
     new_task()
     next_action = input("what to do next?")
-    #if next_action == 
+    if next_action.lower() == "q":
+        is_running = False
+
+database = [{"token_id": "row", "token_name": "rowbow", "token_supply": 100, "id": 1}, {"token_id": "rai", "token_name": "rain", "token_supply": 10000, "id": 2}]
+print(len(database))
