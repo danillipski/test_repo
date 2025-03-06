@@ -78,5 +78,3 @@ def delete_crypto(id: int):
     delete_id(id, database)
     print(database, end=" ")
     return {"id": id, "message" : "was succesfully deleted"}
-    
-    
