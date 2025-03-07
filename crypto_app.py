@@ -2,8 +2,23 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException, status
 from pydantic import BaseModel
 from fastapi.params import Body
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import time
 
 app = FastAPI()
+while True: 
+    try: 
+        conn = psycopg2.connect(host="localhost", database="fastapi", user="postgres", password="**************", port=5432, cursor_factory=RealDictCursor)
+        cur = conn.cursor()
+        print("Database connection was succesfull!")
+        break
+        
+    except Exception as error:
+        print("Database connection has failed")
+        print(f"The error was: {error}")
+        time.sleep(3)
+
 
 def add_id(database, dict_token):
     previous_id = len(database)
@@ -50,10 +65,18 @@ def my_profile():
     return {"user_name" : "me", "portfolio" : "1,000 USD"}  
 
 
-@app.get("/crypto/{id}")
-def crypto_id(id: int):
-    token_id = find_id(id, database)
-    return {"pair id" : id, "data" : token_id}
+#@app.get("/crypto/{id}")
+#def crypto_id(id: int):
+#    token_id = find_id(id, database)
+#    return {"pair id" : id, "data" : token_id}
+
+@app.get("/crypto/{CA}")
+def crypto_id(CA: str):
+    CA_corrected = ("'"+ CA +"'")  
+    cur.execute(f'SELECT * FROM crypto_pairs WHERE "CA" = {CA_corrected}')
+    crypto_pair = cur.fetchall()
+    print(crypto_pair)
+    return {"crypto_pair" : crypto_pair}
 
 # Here is how to extract the data from the Body # Body is a property???
 @app.post("/crypto/create/", status_code=201)
