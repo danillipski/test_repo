@@ -16,7 +16,7 @@ while True:
             host="localhost", 
             database="fastapi", 
             user="postgres", 
-            password="************", 
+            password="******", 
             port=5432, 
             cursor_factory=RealDictCursor)
 
@@ -54,11 +54,11 @@ def create_pair_to_database(crypto):
 
         (
 
-        dict_Crypto['CA'], 
-        dict_Crypto['Token_name'], 
-        dict_Crypto['Token_ID'], 
-        dict_Crypto['Description'], 
-        dict_Crypto['Supply']
+            dict_Crypto['CA'], 
+            dict_Crypto['Token_name'], 
+            dict_Crypto['Token_ID'], 
+            dict_Crypto['Description'], 
+            dict_Crypto['Supply']
 
         ))   
 
@@ -79,8 +79,8 @@ def update_pair_in_database(crypto, CA):
     
     (
 
-    crypto_Dict['Description'],
-    CA
+        crypto_Dict['Description'],
+        CA
 
     ))
 
@@ -88,6 +88,20 @@ def update_pair_in_database(crypto, CA):
     conn.commit()
     return update_pair
     
+
+def delete_crypto_pair_from_database(CA):
+    curr.execute("""DELETE FROM crypto_pairs WHERE "CA" = %s RETURNING *""",
+
+    ( 
+
+        CA,
+
+    ))
+
+    deleted_pair = curr.fetchone()
+    conn.commit()
+    return deleted_pair
+
 
 def get_list_of_all_crypto_pairs():
         curr.execute("SELECT * FROM crypto_pairs")
@@ -135,3 +149,13 @@ def update_crypto_pair(CA: str, crypto: Update_Crypto):
         return {"404": "Page wasnt found!"}
 
 
+@app.delete("/crypto/pairs/{CA}")
+def delete_crypto_pair(CA: str):
+    try:
+        delete_pair = delete_crypto_pair_from_database(CA)
+        deleted_ca = delete_pair["CA"]
+        return {f"Pair with CA {deleted_ca}": "Was Succesfully deleted",
+        "data:": delete_pair}
+    except Exception as error:
+        print(error)
+        return {"404": "page was not found"}
