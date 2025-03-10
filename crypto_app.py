@@ -16,7 +16,7 @@ while True:
             host="localhost", 
             database="fastapi", 
             user="postgres", 
-            password="***************", 
+            password="************", 
             port=5432, 
             cursor_factory=RealDictCursor)
 
@@ -38,7 +38,8 @@ class Crypto(BaseModel):
     Description: Optional[str] = None
     Supply: Optional[int] = None 
 
-
+class Update_Crypto(BaseModel):
+    Description: Optional[str] = None
 
 # Create a function that that creates a new pair in database
 def create_pair_to_database(crypto):
@@ -67,6 +68,26 @@ def create_pair_to_database(crypto):
     conn.commit() 
     # Returning a pair stored in a variable
     return new_pair
+
+
+def update_pair_in_database(crypto, CA):
+
+    crypto_Dict = crypto.dict()
+
+
+    curr.execute("""UPDATE crypto_pairs SET "Description" = %s WHERE "CA" = %s RETURNING *""", 
+    
+    (
+
+    crypto_Dict['Description'],
+    CA
+
+    ))
+
+    update_pair = curr.fetchone()
+    conn.commit()
+    return update_pair
+    
 
 def get_list_of_all_crypto_pairs():
         curr.execute("SELECT * FROM crypto_pairs")
@@ -102,3 +123,15 @@ def get_all_crypto():
     except Exception as error:
         print(error)
         return {"404": "It is not what you looking for"}
+
+
+@app.put("/crypto/pairs/{CA}")
+def update_crypto_pair(CA: str, crypto: Update_Crypto):
+    try: 
+        update_pair = update_pair_in_database(crypto, CA)
+        return {"Update": "Succesfull", "CA": update_pair["CA"], "data": update_pair}
+    except Exception as error:
+        print(error)
+        return {"404": "Page wasnt found!"}
+
+
