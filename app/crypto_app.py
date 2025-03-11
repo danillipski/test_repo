@@ -5,10 +5,24 @@ from fastapi.params import Body
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import time
+from fastapi.responses import FileResponse
+from . import models
+from .database import engine, SessionLocal
 
-
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# Open a session and after its done we will close it out 
+# ( we will call out this function any time we have a request to our api end points)
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
 while True:
     try: 
         # Connect to an existing database 
@@ -16,7 +30,7 @@ while True:
             host="localhost", 
             database="fastapi", 
             user="postgres", 
-            password="******", 
+            password="**********", 
             port=5432, 
             cursor_factory=RealDictCursor)
 
@@ -99,6 +113,11 @@ def delete_crypto_pair_from_database(CA):
     ))
 
     deleted_pair = curr.fetchone()
+
+    if deleted_pair == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"pair with CA {CA} was not found!")
+
     conn.commit()
     return deleted_pair
 
@@ -151,11 +170,19 @@ def update_crypto_pair(CA: str, crypto: Update_Crypto):
 
 @app.delete("/crypto/pairs/{CA}")
 def delete_crypto_pair(CA: str):
-    try:
-        delete_pair = delete_crypto_pair_from_database(CA)
-        deleted_ca = delete_pair["CA"]
-        return {f"Pair with CA {deleted_ca}": "Was Succesfully deleted",
-        "data:": delete_pair}
-    except Exception as error:
-        print(error)
-        return {"404": "page was not found"}
+    #try:
+    delete_pair = delete_crypto_pair_from_database(CA)
+    deleted_ca = delete_pair["CA"]
+    return {f"Pair with CA {deleted_ca}": "Was Succesfully deleted",
+    "data:": delete_pair}
+    #except Exception as error:
+        #print(error)
+        #return {"404": "page was not found"}
+
+
+
+
+
+@app.get("/crypto/html")
+def return_html_test():
+    return FileResponse("crypto.html")
